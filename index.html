@@ -272,18 +272,12 @@
             <label for="sourceDateTime">原始日期時間</label>
             <input id="sourceDateTime" type="datetime-local" />
           </div>
-
-          <div class="field">
-            <label for="customZone">自訂 IANA 時區（可選）</label>
-            <input id="customZone" type="text" placeholder="例如：Europe/Dublin、Asia/Taipei" />
-          </div>
         </div>
 
         <div class="section-title">快捷操作</div>
         <div class="inline">
           <button id="nowBtn" class="primary" type="button">使用現在時間</button>
           <button id="swapBtn" type="button">交換原始／目標時區</button>
-          <button id="applyCustomBtn" type="button">套用自訂時區到目標</button>
         </div>
 
         <div class="section-title">調整日、時、分</div>
@@ -312,11 +306,6 @@
             </div>
           </div>
         </div>
-
-        <div class="section-title">說明</div>
-        <div class="info-box ok">
-          這個網站不是用固定加減幾小時，而是用 IANA 時區資料換算，所以當日期切到夏令時間或冬令時間時，偏移量會自動變化。
-        </div>
       </section>
 
       <section class="card">
@@ -335,9 +324,6 @@
             <div id="targetMainTime" class="main-time"></div>
             <div id="targetMeta" class="meta"></div>
           </div>
-
-          <div id="diffBox" class="info-box"></div>
-          <div id="dstBox" class="info-box"></div>
           <div id="warningBox" class="info-box warn" style="display:none;"></div>
         </div>
       </section>
