@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>時差轉換網站</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.7.2/luxon.min.js"></script>
+  <style>
+    :root {
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --line: #dbe3ef;
+      --text: #1f2937;
+      --muted: #667085;
+      --accent: #2563eb;
+      --accent-soft: #eff6ff;
+      --ok: #0f766e;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: linear-gradient(180deg, #eef4ff 0%, var(--bg) 100%);
+      color: var(--text);
+    }
+
+    .wrap {
+      max-width: 1120px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+    }
+
+    .sub {
+      margin: 0 0 24px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 20px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 20px;
+    }
+
+    .card h2 {
+      margin: 0 0 16px;
+      font-size: 22px;
+    }
+
+    .section-title {
+      margin: 24px 0 12px;
+      font-size: 16px;
+      color: var(--muted);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    label {
+      font-size: 14px;
+      font-weight: 700;
+    }
+
+    input, select, button {
+      font: inherit;
+    }
+
+    input[type="datetime-local"], input[type="text"], select {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 12px 14px;
+      background: #fff;
+      color: var(--text);
+    }
+
+    .inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--text);
+      border-radius: 14px;
+      padding: 10px 14px;
+      cursor: pointer;
+      transition: transform 0.08s ease, border-color 0.2s ease, background 0.2s ease;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: #bfd2ff;
+      background: #f8fbff;
+    }
+
+    button.primary {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .adjust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .adjust-box {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 14px;
+      background: #fcfdff;
+    }
+
+    .adjust-box h3 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .adjust-box .inline button {
+      flex: 1;
+      min-width: 72px;
+    }
+
+    .result-stack {
+      display: grid;
+      gap: 16px;
+    }
+
+    .time-box {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+      background: linear-gradient(180deg, #ffffff 0%, #fbfdff 100%);
+    }
+
+    .time-box .tag {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      padding: 6px 10px;
+      background: var(--accent-soft);
+      color: var(--accent);
+      border-radius: 999px;
+      margin-bottom: 10px;
+    }
+
+    .zone-name {
+      font-size: 18px;
+      font-weight: 800;
+      margin-bottom: 6px;
+    }
+
+    .main-time {
+      font-size: 28px;
+      font-weight: 800;
+      line-height: 1.3;
+      margin-bottom: 8px;
+    }
+
+    .meta {
+      color: var(--muted);
+      line-height: 1.8;
+      font-size: 14px;
+    }
+
+    .info-box {
+      border-radius: 16px;
+      padding: 14px 16px;
+      line-height: 1.7;
+      font-size: 14px;
+      border: 1px solid var(--line);
+      background: #fafcff;
+    }
+
+    .info-box.warn {
+      border-color: #f7d7a8;
+      background: #fff8eb;
+      color: #8a4b00;
+    }
+
+    .info-box.ok {
+      border-color: #bfe7dd;
+      background: #f0fdfa;
+      color: #115e59;
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    code {
+      background: #eef2ff;
+      padding: 2px 6px;
+      border-radius: 8px;
+      font-size: 13px;
+    }
+
+    @media (max-width: 900px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .form-grid,
+      .adjust-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .main-time {
+        font-size: 24px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>時差轉換網站</h1>
+    <p class="sub">
+      可調整日、時、分，並依照你選的日期自動套用冬令時間／夏令時間。<br>
+      這個版本可直接放到 GitHub Pages 使用。
+    </p>
+
+    <div class="grid">
+      <section class="card">
+        <h2>設定</h2>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="sourceZone">原始時區</label>
+            <select id="sourceZone"></select>
+          </div>
+
+          <div class="field">
+            <label for="targetZone">目標時區</label>
+            <select id="targetZone"></select>
+          </div>
+
+          <div class="field">
+            <label for="sourceDateTime">原始日期時間</label>
+            <input id="sourceDateTime" type="datetime-local" />
+          </div>
+
+          <div class="field">
+            <label for="customZone">自訂 IANA 時區（可選）</label>
+            <input id="customZone" type="text" placeholder="例如：Europe/Dublin、Asia/Taipei" />
+          </div>
+        </div>
+
+        <div class="section-title">快捷操作</div>
+        <div class="inline">
+          <button id="nowBtn" class="primary" type="button">使用現在時間</button>
+          <button id="swapBtn" type="button">交換原始／目標時區</button>
+          <button id="applyCustomBtn" type="button">套用自訂時區到目標</button>
+        </div>
+
+        <div class="section-title">調整日、時、分</div>
+        <div class="adjust-grid">
+          <div class="adjust-box">
+            <h3>日</h3>
+            <div class="inline">
+              <button type="button" data-days="-1">-1 日</button>
+              <button type="button" data-days="1">+1 日</button>
+            </div>
+          </div>
+
+          <div class="adjust-box">
+            <h3>時</h3>
+            <div class="inline">
+              <button type="button" data-hours="-1">-1 小時</button>
+              <button type="button" data-hours="1">+1 小時</button>
+            </div>
+          </div>
+
+          <div class="adjust-box">
+            <h3>分</h3>
+            <div class="inline">
+              <button type="button" data-minutes="-1">-1 分</button>
+              <button type="button" data-minutes="1">+1 分</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title">說明</div>
+        <div class="info-box ok">
+          這個網站不是用固定加減幾小時，而是用 IANA 時區資料換算，所以當日期切到夏令時間或冬令時間時，偏移量會自動變化。
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>轉換結果</h2>
+        <div class="result-stack">
+          <div class="time-box">
+            <div class="tag">原始時區</div>
+            <div id="sourceZoneLabel" class="zone-name"></div>
+            <div id="sourceMainTime" class="main-time"></div>
+            <div id="sourceMeta" class="meta"></div>
+          </div>
+
+          <div class="time-box">
+            <div class="tag">目標時區</div>
+            <div id="targetZoneLabel" class="zone-name"></div>
+            <div id="targetMainTime" class="main-time"></div>
+            <div id="targetMeta" class="meta"></div>
+          </div>
+
+          <div id="diffBox" class="info-box"></div>
+          <div id="dstBox" class="info-box"></div>
+          <div id="warningBox" class="info-box warn" style="display:none;"></div>
+        </div>
+      </section>
+    </div>
+
+    <div class="card" style="margin-top:20px;">
+      <h2>GitHub Pages 部署方式</h2>
+      <div class="muted">
+        1. 建立一個新的 GitHub repository。<br>
+        2. 把這份檔案命名為 <code>index.html</code> 上傳。<br>
+        3. 到 GitHub 的 <code>Settings → Pages</code>。<br>
+        4. Source 選 <code>Deploy from a branch</code>。<br>
+        5. Branch 選 <code>main</code>，資料夾選 <code>/root</code>。<br>
+        6. 儲存後，幾分鐘內就會拿到網站網址。
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const { DateTime, IANAZone } = luxon;
+
+    const zoneOptions = [
+      ["Asia/Taipei", "台灣 Taipei"],
+      ["Europe/Dublin", "愛爾蘭 Dublin"],
+      ["Europe/London", "英國 London"],
+      ["Europe/Paris", "法國 Paris"],
+      ["Europe/Berlin", "德國 Berlin"],
+      ["Asia/Tokyo", "日本 Tokyo"],
+      ["Asia/Seoul", "韓國 Seoul"],
+      ["Asia/Hong_Kong", "香港 Hong Kong"],
+      ["Asia/Singapore", "新加坡 Singapore"],
+      ["America/New_York", "美國 New York"],
+      ["America/Chicago", "美國 Chicago"],
+      ["America/Los_Angeles", "美國 Los Angeles"],
+      ["Australia/Sydney", "澳洲 Sydney"],
+      ["UTC", "UTC"]
+    ];
+
+    const sourceZoneEl = document.getElementById("sourceZone");
+    const targetZoneEl = document.getElementById("targetZone");
+    const sourceDateTimeEl = document.getElementById("sourceDateTime");
+    const customZoneEl = document.getElementById("customZone");
+    const applyCustomBtn = document.getElementById("applyCustomBtn");
+    const nowBtn = document.getElementById("nowBtn");
+    const swapBtn = document.getElementById("swapBtn");
+
+    const sourceZoneLabel = document.getElementById("sourceZoneLabel");
+    const sourceMainTime = document.getElementById("sourceMainTime");
+    const sourceMeta = document.getElementById("sourceMeta");
+    const targetZoneLabel = document.getElementById("targetZoneLabel");
+    const targetMainTime = document.getElementById("targetMainTime");
+    const targetMeta = document.getElementById("targetMeta");
+    const diffBox = document.getElementById("diffBox");
+    const dstBox = document.getElementById("dstBox");
+    const warningBox = document.getElementById("warningBox");
+
+    function populateZones() {
+      [sourceZoneEl, targetZoneEl].forEach((select) => {
+        zoneOptions.forEach(([value, text]) => {
+          const option = document.createElement("option");
+          option.value = value;
+          option.textContent = `${text} (${value})`;
+          select.appendChild(option);
+        });
+      });
+
+      sourceZoneEl.value = "Asia/Taipei";
+      targetZoneEl.value = "Europe/Dublin";
+    }
+
+    function toInputValue(dt) {
+      return dt.toFormat("yyyy-LL-dd'T'HH:mm");
+    }
+
+    function formatOffset(minutes) {
+      const sign = minutes >= 0 ? "+" : "-";
+      const abs = Math.abs(minutes);
+      const h = String(Math.floor(abs / 60)).padStart(2, "0");
+      const m = String(abs % 60).padStart(2, "0");
+      return `UTC${sign}${h}:${m}`;
+    }
+
+    function formatMain(dt) {
+      return dt.setLocale("zh-TW").toFormat("yyyy/LL/dd ccc HH:mm");
+    }
+
+    function formatMeta(dt) {
+      const dstText = dt.isOffsetFixed
+        ? "固定時區"
+        : dt.isInDST
+          ? "目前為夏令時間"
+          : "目前非夏令時間";
+
+      return [
+        `時區代碼：${dt.zoneName}`,
+        `偏移量：${formatOffset(dt.offset)}`,
+        `名稱：${dt.offsetNameLong || dt.offsetNameShort || "-"}`,
+        `狀態：${dstText}`
+      ].join("<br>");
+    }
+
+    function getSourceDateTime() {
+      const raw = sourceDateTimeEl.value;
+      const zone = sourceZoneEl.value;
+      if (!raw) return null;
+      return DateTime.fromISO(raw, { zone });
+    }
+
+    function updateWarnings(sourceDT, rawInput) {
+      const warnings = [];
+
+      if (!sourceDT || !sourceDT.isValid) {
+        warnings.push("日期時間無效，請重新輸入。");
+      }
+
+      if (sourceDT && sourceDT.isValid) {
+        const roundTrip = sourceDT.toFormat("yyyy-LL-dd'T'HH:mm");
+        if (rawInput && roundTrip !== rawInput) {
+          warnings.push(`你輸入的本地時間可能剛好落在夏令時間切換的跳時區段。系統已自動校正為 ${roundTrip}。`);
+        }
+
+        const possible = sourceDT.getPossibleOffsets ? sourceDT.getPossibleOffsets() : [];
+        if (possible.length > 1) {
+          const offsetList = possible
+            .map(item => `${item.toFormat("yyyy-LL-dd HH:mm")} (${formatOffset(item.offset)})`)
+            .join("、");
+          warnings.push(`這個時間在該時區可能有兩種解讀，因為剛好遇到冬令時間切換。可能偏移量有：${offsetList}`);
+        }
+      }
+
+      if (warnings.length) {
+        warningBox.style.display = "block";
+        warningBox.innerHTML = warnings.join("<br><br>");
+      } else {
+        warningBox.style.display = "none";
+        warningBox.innerHTML = "";
+      }
+    }
+
+    function render() {
+      const rawInput = sourceDateTimeEl.value;
+      const sourceDT = getSourceDateTime();
+
+      if (!sourceDT || !sourceDT.isValid) {
+        sourceZoneLabel.textContent = sourceZoneEl.value || "-";
+        sourceMainTime.textContent = "請選擇日期時間";
+        sourceMeta.innerHTML = "-";
+        targetZoneLabel.textContent = targetZoneEl.value || "-";
+        targetMainTime.textContent = "-";
+        targetMeta.innerHTML = "-";
+        diffBox.innerHTML = "請先輸入有效的原始日期時間。";
+        dstBox.innerHTML = "系統會依照你選的日期，自動判斷夏令時間與冬令時間。";
+        updateWarnings(sourceDT, rawInput);
+        return;
+      }
+
+      const targetDT = sourceDT.setZone(targetZoneEl.value);
+      const diffMinutes = targetDT.offset - sourceDT.offset;
+      const diffHours = (diffMinutes / 60).toFixed(Number.isInteger(diffMinutes / 60) ? 0 : 1);
+
+      sourceZoneLabel.textContent = sourceZoneEl.value;
+      sourceMainTime.textContent = formatMain(sourceDT);
+      sourceMeta.innerHTML = formatMeta(sourceDT);
+
+      targetZoneLabel.textContent = targetZoneEl.value;
+      targetMainTime.textContent = formatMain(targetDT);
+      targetMeta.innerHTML = formatMeta(targetDT);
+
+      diffBox.innerHTML = `
+        以你目前選的這個時間點來看，<strong>${targetZoneEl.value}</strong> 與
+        <strong>${sourceZoneEl.value}</strong> 的時差為
+        <strong>${diffMinutes >= 0 ? "+" : ""}${diffHours} 小時</strong>。
+        <br>這個差值會跟著日期改變，因為不同國家的夏令時間開始與結束日期可能不同。
+      `;
+
+      dstBox.innerHTML = `
+        原始時區：<strong>${sourceDT.offsetNameLong || sourceDT.offsetNameShort || sourceDT.zoneName}</strong><br>
+        目標時區：<strong>${targetDT.offsetNameLong || targetDT.offsetNameShort || targetDT.zoneName}</strong><br>
+        只要你改動日期，系統就會重新計算當天是否正在使用夏令時間或冬令時間。
+      `;
+
+      updateWarnings(sourceDT, rawInput);
+    }
+
+    function adjustTime({ days = 0, hours = 0, minutes = 0 }) {
+      let dt = getSourceDateTime();
+      if (!dt || !dt.isValid) {
+        dt = DateTime.now().setZone(sourceZoneEl.value).startOf("minute");
+      }
+
+      dt = dt.plus({ days, hours, minutes });
+      sourceDateTimeEl.value = toInputValue(dt);
+      render();
+    }
+
+    function setNow() {
+      const now = DateTime.now().setZone(sourceZoneEl.value).startOf("minute");
+      sourceDateTimeEl.value = toInputValue(now);
+      render();
+    }
+
+    function applyCustomZone() {
+      const zone = customZoneEl.value.trim();
+      if (!zone) return;
+
+      if (!IANAZone.isValidZone(zone) && zone !== "UTC") {
+        alert("這不是有效的 IANA 時區格式，請輸入像 Europe/Dublin 或 Asia/Taipei 這樣的值。");
+        return;
+      }
+
+      if (![...targetZoneEl.options].some(option => option.value === zone)) {
+        const option = document.createElement("option");
+        option.value = zone;
+        option.textContent = `自訂時區 (${zone})`;
+        targetZoneEl.appendChild(option);
+      }
+
+      targetZoneEl.value = zone;
+      render();
+    }
+
+    function swapZones() {
+      const source = sourceZoneEl.value;
+      const target = targetZoneEl.value;
+      sourceZoneEl.value = target;
+      targetZoneEl.value = source;
+
+      const dt = getSourceDateTime();
+      if (dt && dt.isValid) {
+        const swapped = dt.setZone(sourceZoneEl.value);
+        sourceDateTimeEl.value = toInputValue(swapped);
+      }
+
+      render();
+    }
+
+    document.querySelectorAll("[data-days], [data-hours], [data-minutes]").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        adjustTime({
+          days: Number(btn.dataset.days || 0),
+          hours: Number(btn.dataset.hours || 0),
+          minutes: Number(btn.dataset.minutes || 0)
+        });
+      });
+    });
+
+    sourceZoneEl.addEventListener("change", () => {
+      const current = getSourceDateTime();
+      if (current && current.isValid) {
+        const keepClockTime = DateTime.fromObject(
+          {
+            year: current.year,
+            month: current.month,
+            day: current.day,
+            hour: current.hour,
+            minute: current.minute
+          },
+          { zone: sourceZoneEl.value }
+        );
+        sourceDateTimeEl.value = toInputValue(keepClockTime);
+      } else {
+        setNow();
+        return;
+      }
+      render();
+    });
+
+    targetZoneEl.addEventListener("change", render);
+    sourceDateTimeEl.addEventListener("input", render);
+    applyCustomBtn.addEventListener("click", applyCustomZone);
+    nowBtn.addEventListener("click", setNow);
+    swapBtn.addEventListener("click", swapZones);
+
+    populateZones();
+    setNow();
+  </script>
+</body>
+</html>
