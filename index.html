@@ -3,22 +3,27 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>時差轉換器</title>
+  <title>時區轉換</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.7.2/luxon.min.js"></script>
   <style>
     :root {
-      --bg: #f6f8fc;
+      --bg1: #f4f7ff;
+      --bg2: #eefbf8;
       --card: rgba(255, 255, 255, 0.92);
-      --line: #e3e9f4;
-      --text: #182230;
-      --muted: #6b7280;
+      --card-strong: rgba(255, 255, 255, 0.98);
+      --line: #e5ebf5;
+      --text: #172033;
+      --muted: #667085;
       --primary: #2563eb;
       --primary-soft: #eef4ff;
       --accent: #0f766e;
+      --shadow: 0 24px 60px rgba(15, 23, 42, 0.10);
+      --radius-xl: 28px;
+      --radius-lg: 20px;
+      --radius-md: 16px;
       --warn-bg: #fff7ed;
-      --warn-line: #fed7aa;
-      --shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
-      --radius: 24px;
+      --warn-line: #fdba74;
+      --warn-text: #9a3412;
     }
 
     * {
@@ -30,68 +35,63 @@
       font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at top left, rgba(37, 99, 235, 0.08), transparent 30%),
-        radial-gradient(circle at top right, rgba(15, 118, 110, 0.08), transparent 26%),
-        var(--bg);
+        radial-gradient(circle at 12% 12%, rgba(37, 99, 235, 0.10), transparent 24%),
+        radial-gradient(circle at 88% 8%, rgba(15, 118, 110, 0.08), transparent 22%),
+        linear-gradient(180deg, var(--bg1) 0%, #f8fbff 42%, var(--bg2) 100%);
+      min-height: 100vh;
     }
 
     .wrap {
-      max-width: 1120px;
+      max-width: 1180px;
       margin: 0 auto;
-      padding: 28px 18px 44px;
+      padding: 28px 18px 40px;
     }
 
-    .hero {
-      margin-bottom: 18px;
+    .topbar {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 22px;
     }
 
-    .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 8px 12px;
-      border-radius: 999px;
-      background: rgba(255, 255, 255, 0.88);
-      border: 1px solid var(--line);
-      color: var(--primary);
-      font-size: 13px;
-      font-weight: 700;
-      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.04);
+    .title-box {
+      width: 100%;
+      text-align: center;
+      padding: 26px 20px 18px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(18px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 18px 45px rgba(15, 23, 42, 0.06);
     }
 
     h1 {
-      margin: 14px 0 8px;
-      font-size: clamp(30px, 4vw, 42px);
-      line-height: 1.15;
-      letter-spacing: -0.03em;
-    }
-
-    .sub {
       margin: 0;
-      color: var(--muted);
-      line-height: 1.8;
-      font-size: 15px;
+      font-size: clamp(34px, 5vw, 52px);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      font-weight: 900;
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 1.1fr 0.9fr;
-      gap: 18px;
-      margin-top: 22px;
+      grid-template-columns: 1.08fr 0.92fr;
+      gap: 20px;
+      align-items: start;
     }
 
     .card {
       background: var(--card);
-      backdrop-filter: blur(14px);
-      border: 1px solid rgba(227, 233, 244, 0.95);
-      border-radius: var(--radius);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: var(--radius-xl);
       box-shadow: var(--shadow);
-      padding: 20px;
+      padding: 22px;
     }
 
     .card h2 {
-      margin: 0 0 14px;
+      margin: 0 0 16px;
       font-size: 20px;
+      letter-spacing: -0.02em;
     }
 
     .form-grid {
@@ -112,8 +112,9 @@
 
     label {
       font-size: 13px;
-      color: var(--muted);
       font-weight: 700;
+      color: var(--muted);
+      letter-spacing: 0.01em;
     }
 
     select,
@@ -126,115 +127,144 @@
     input[type="datetime-local"] {
       width: 100%;
       border: 1px solid var(--line);
-      border-radius: 16px;
-      padding: 13px 14px;
-      background: rgba(255, 255, 255, 0.96);
+      border-radius: 18px;
+      padding: 14px 15px;
+      background: rgba(255, 255, 255, 0.98);
       color: var(--text);
       outline: none;
+      transition: 0.18s ease;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.8);
     }
 
     select:focus,
     input[type="datetime-local"]:focus {
-      border-color: #bfd2ff;
+      border-color: #bfd3ff;
       box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
     }
 
-    .toolbar,
-    .adjust-row,
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    button {
+      border: 1px solid var(--line);
+      background: rgba(255, 255, 255, 0.98);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 12px 16px;
+      cursor: pointer;
+      transition: 0.18s ease;
+      font-weight: 700;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      border-color: #c9d8ff;
+      box-shadow: 0 10px 24px rgba(37, 99, 235, 0.07);
+    }
+
+    button.primary {
+      background: linear-gradient(180deg, #3478ff 0%, #2563eb 100%);
+      color: white;
+      border-color: #2563eb;
+      box-shadow: 0 12px 24px rgba(37, 99, 235, 0.22);
+    }
+
+    button.soft {
+      background: var(--primary-soft);
+      color: var(--primary);
+      border-color: transparent;
+    }
+
+    .section-title {
+      margin: 20px 0 12px;
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+
+    .adjust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+    }
+
+    .adjust-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    .adjust-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .adjust-label {
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .adjust-unit {
+      font-size: 12px;
+      color: var(--muted);
+      background: #f8fafc;
+      border: 1px solid var(--line);
+      padding: 5px 8px;
+      border-radius: 999px;
+    }
+
+    .adjust-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .adjust-row button {
+      width: 100%;
+      padding: 13px 10px;
+      border-radius: 16px;
+    }
+
+    .preset-wrap {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+    }
+
+    .preset-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px;
+    }
+
+    .preset-title {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--muted);
+      margin-bottom: 10px;
+    }
+
     .preset-row {
       display: flex;
       flex-wrap: wrap;
       gap: 10px;
     }
 
-    .toolbar {
-      margin-top: 14px;
-    }
-
-    .section-title {
-      margin: 18px 0 10px;
-      font-size: 13px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-
-    button {
-      border: 1px solid var(--line);
-      background: rgba(255, 255, 255, 0.96);
-      color: var(--text);
-      padding: 11px 14px;
-      border-radius: 16px;
-      cursor: pointer;
-      transition: 0.18s ease;
-    }
-
-    button:hover {
-      transform: translateY(-1px);
-      border-color: #cbd9ff;
-      background: #fbfdff;
-    }
-
-    button.primary {
-      background: var(--primary);
-      color: #fff;
-      border-color: var(--primary);
-    }
-
-    button.ghost {
-      background: var(--primary-soft);
-      color: var(--primary);
-      border-color: transparent;
-    }
-
-    .adjust-group {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 12px;
-    }
-
-    .mini-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.88);
-    }
-
-    .mini-card h3 {
-      margin: 0 0 10px;
-      font-size: 15px;
-    }
-
-    .mini-card .adjust-row button {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .preset-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 12px;
-      margin-top: 10px;
-    }
-
-    .preset-card {
-      border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px;
-      background: rgba(255, 255, 255, 0.92);
-    }
-
-    .preset-card-title {
-      font-size: 13px;
-      color: var(--muted);
-      margin-bottom: 10px;
-      font-weight: 700;
-    }
-
     .chip {
-      padding: 9px 12px;
       border-radius: 999px;
+      padding: 10px 13px;
       font-size: 14px;
       line-height: 1;
+      background: rgba(255, 255, 255, 0.98);
     }
 
     .results {
@@ -243,10 +273,24 @@
     }
 
     .result-card {
+      background: var(--card-strong);
       border: 1px solid var(--line);
-      border-radius: 22px;
-      padding: 16px;
-      background: rgba(255, 255, 255, 0.96);
+      border-radius: 24px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .result-card::after {
+      content: "";
+      position: absolute;
+      top: -20px;
+      right: -20px;
+      width: 90px;
+      height: 90px;
+      border-radius: 999px;
+      background: radial-gradient(circle, rgba(37, 99, 235, 0.10), transparent 68%);
+      pointer-events: none;
     }
 
     .pill {
@@ -255,176 +299,196 @@
       gap: 8px;
       padding: 7px 11px;
       border-radius: 999px;
-      font-size: 12px;
-      font-weight: 700;
       background: var(--primary-soft);
       color: var(--primary);
+      font-size: 12px;
+      font-weight: 800;
       margin-bottom: 10px;
     }
 
     .city {
       font-size: 15px;
-      color: var(--muted);
-      margin-bottom: 6px;
       font-weight: 700;
+      color: var(--muted);
+      line-height: 1.6;
+      margin-bottom: 6px;
     }
 
     .time {
-      font-size: clamp(24px, 4vw, 32px);
-      font-weight: 800;
-      line-height: 1.25;
-      letter-spacing: -0.02em;
+      font-size: clamp(32px, 5vw, 44px);
+      font-weight: 900;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
       margin-bottom: 6px;
     }
 
     .date {
       color: var(--muted);
-      line-height: 1.7;
       font-size: 14px;
+      line-height: 1.7;
     }
 
     .offset-box {
       display: flex;
-      align-items: center;
       justify-content: space-between;
+      align-items: center;
       gap: 12px;
+      padding: 16px 18px;
+      border-radius: 22px;
       border: 1px solid var(--line);
-      border-radius: 18px;
-      padding: 14px 16px;
       background: linear-gradient(180deg, #f8fbff 0%, #ffffff 100%);
     }
 
-    .offset-text {
+    .offset-label {
       font-size: 14px;
-      color: var(--muted);
       line-height: 1.7;
+      color: var(--muted);
     }
 
     .offset-value {
-      font-size: 22px;
-      font-weight: 800;
+      font-size: 26px;
+      font-weight: 900;
       color: var(--accent);
       white-space: nowrap;
+      letter-spacing: -0.03em;
     }
 
     .warning {
       display: none;
+      border-radius: 20px;
+      padding: 14px 16px;
       border: 1px solid var(--warn-line);
       background: var(--warn-bg);
-      color: #9a3412;
-      border-radius: 18px;
-      padding: 14px 16px;
-      line-height: 1.75;
+      color: var(--warn-text);
+      line-height: 1.8;
       font-size: 14px;
     }
 
-    .footer-note {
-      margin-top: 12px;
-      color: var(--muted);
-      font-size: 13px;
-      line-height: 1.7;
-    }
-
-    @media (max-width: 900px) {
-      .layout,
-      .preset-grid,
-      .adjust-group,
-      .form-grid {
+    @media (max-width: 980px) {
+      .layout {
         grid-template-columns: 1fr;
       }
+    }
 
+    @media (max-width: 720px) {
       .wrap {
-        padding: 20px 14px 30px;
+        padding: 18px 12px 28px;
       }
 
-      .card {
+      .card,
+      .title-box {
         padding: 16px;
-        border-radius: 20px;
+      }
+
+      .form-grid,
+      .adjust-grid,
+      .preset-wrap {
+        grid-template-columns: 1fr;
       }
 
       .offset-box {
         flex-direction: column;
         align-items: flex-start;
       }
+
+      .toolbar button,
+      .chip {
+        width: 100%;
+      }
+
+      .adjust-row {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
     }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <section class="hero">
-      <div class="eyebrow">Time Zone Converter</div>
-      <h1>時差轉換，簡單又好看</h1>
-      <p class="sub">像常見時差網站一樣直覺，但介面更乾淨。支援日期、時、分調整，並自動處理冬令時間和夏令時間。</p>
-    </section>
+    <div class="topbar">
+      <div class="title-box">
+        <h1>時區轉換</h1>
+      </div>
+    </div>
 
-    <section class="layout">
-      <div class="card">
-        <h2>轉換設定</h2>
+    <div class="layout">
+      <section class="card">
+        <h2>設定</h2>
 
         <div class="form-grid">
           <div class="field">
-            <label for="sourceZone">原始時區</label>
+            <label for="sourceZone">原始城市 / 時區</label>
             <select id="sourceZone"></select>
           </div>
 
           <div class="field">
-            <label for="targetZone">目標時區</label>
+            <label for="targetZone">目標城市 / 時區</label>
             <select id="targetZone"></select>
           </div>
 
           <div class="field full">
-            <label for="sourceDateTime">原始日期時間</label>
+            <label for="sourceDateTime">日期與時間</label>
             <input id="sourceDateTime" type="datetime-local" />
           </div>
         </div>
 
         <div class="toolbar">
           <button id="nowBtn" class="primary" type="button">現在時間</button>
-          <button id="swapBtn" class="ghost" type="button">交換時區</button>
+          <button id="swapBtn" class="soft" type="button">交換時區</button>
         </div>
 
         <div class="section-title">調整時間</div>
-        <div class="adjust-group">
-          <div class="mini-card">
-            <h3>日</h3>
+        <div class="adjust-grid">
+          <div class="adjust-card">
+            <div class="adjust-head">
+              <div class="adjust-label">日</div>
+              <div class="adjust-unit">1 日</div>
+            </div>
             <div class="adjust-row">
               <button type="button" data-days="-1">-1</button>
               <button type="button" data-days="1">+1</button>
             </div>
           </div>
 
-          <div class="mini-card">
-            <h3>時</h3>
+          <div class="adjust-card">
+            <div class="adjust-head">
+              <div class="adjust-label">時</div>
+              <div class="adjust-unit">1 小時</div>
+            </div>
             <div class="adjust-row">
               <button type="button" data-hours="-1">-1</button>
               <button type="button" data-hours="1">+1</button>
             </div>
           </div>
 
-          <div class="mini-card">
-            <h3>分</h3>
+          <div class="adjust-card">
+            <div class="adjust-head">
+              <div class="adjust-label">分</div>
+              <div class="adjust-unit">1 分</div>
+            </div>
             <div class="adjust-row">
-              <button type="button" data-minutes="-30">-30</button>
-              <button type="button" data-minutes="30">+30</button>
+              <button type="button" data-minutes="-1">-1</button>
+              <button type="button" data-minutes="1">+1</button>
             </div>
           </div>
         </div>
 
-        <div class="section-title">常用快捷城市</div>
-        <div class="preset-grid">
+        <div class="section-title">常用城市</div>
+        <div class="preset-wrap">
           <div class="preset-card">
-            <div class="preset-card-title">設為原始</div>
-            <div class="preset-row" id="sourcePresetRow"></div>
+            <div class="preset-title">設為原始</div>
+            <div id="sourcePresetRow" class="preset-row"></div>
           </div>
+
           <div class="preset-card">
-            <div class="preset-card-title">設為目標</div>
-            <div class="preset-row" id="targetPresetRow"></div>
+            <div class="preset-title">設為目標</div>
+            <div id="targetPresetRow" class="preset-row"></div>
           </div>
         </div>
-      </div>
+      </section>
 
-      <div class="card">
-        <h2>轉換結果</h2>
+      <section class="card">
+        <h2>結果</h2>
+
         <div class="results">
           <div class="result-card">
             <div class="pill">原始</div>
@@ -441,45 +505,139 @@
           </div>
 
           <div class="offset-box">
-            <div class="offset-text">依照目前選定的日期與時間，自動計算兩地實際時差。遇到 DST 切換時，差值也會跟著變化。</div>
+            <div class="offset-label">依照你選定的日期與時間，自動處理冬令時間和夏令時間。</div>
             <div id="offsetValue" class="offset-value">+0h</div>
           </div>
 
           <div id="warningBox" class="warning"></div>
         </div>
-
-        <div class="footer-note">建議使用 IANA 時區名稱處理，例如 Asia/Taipei、Europe/Dublin、America/New_York，這樣才能正確套用冬夏令時間。</div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <script>
     const { DateTime } = luxon;
 
-    const zoneOptions = [
-      ["Asia/Taipei", "台北 Taipei"],
-      ["Asia/Tokyo", "東京 Tokyo"],
-      ["Asia/Seoul", "首爾 Seoul"],
-      ["Asia/Singapore", "新加坡 Singapore"],
-      ["Asia/Hong_Kong", "香港 Hong Kong"],
-      ["Europe/Dublin", "都柏林 Dublin"],
-      ["Europe/London", "倫敦 London"],
-      ["Europe/Paris", "巴黎 Paris"],
-      ["Europe/Berlin", "柏林 Berlin"],
-      ["America/New_York", "紐約 New York"],
-      ["America/Chicago", "芝加哥 Chicago"],
-      ["America/Los_Angeles", "洛杉磯 Los Angeles"],
-      ["Australia/Sydney", "雪梨 Sydney"],
-      ["UTC", "UTC"]
+    const groupedZones = [
+      {
+        label: "亞洲 Asia",
+        options: [
+          ["Asia/Taipei", "台北 Taipei"],
+          ["Asia/Tokyo", "東京 Tokyo"],
+          ["Asia/Seoul", "首爾 Seoul"],
+          ["Asia/Hong_Kong", "香港 Hong Kong"],
+          ["Asia/Singapore", "新加坡 Singapore"],
+          ["Asia/Bangkok", "曼谷 Bangkok"],
+          ["Asia/Kuala_Lumpur", "吉隆坡 Kuala Lumpur"],
+          ["Asia/Manila", "馬尼拉 Manila"],
+          ["Asia/Jakarta", "雅加達 Jakarta"],
+          ["Asia/Ho_Chi_Minh", "胡志明市 Ho Chi Minh City"],
+          ["Asia/Shanghai", "上海 Shanghai"],
+          ["Asia/Beijing", "北京 Beijing"],
+          ["Asia/Macau", "澳門 Macau"],
+          ["Asia/Dubai", "杜拜 Dubai"],
+          ["Asia/Kolkata", "加爾各答 Kolkata"],
+          ["Asia/Kathmandu", "加德滿都 Kathmandu"],
+          ["Asia/Colombo", "可倫坡 Colombo"],
+          ["Asia/Tbilisi", "提比里斯 Tbilisi"]
+        ]
+      },
+      {
+        label: "歐洲 Europe",
+        options: [
+          ["Europe/Dublin", "都柏林 Dublin"],
+          ["Europe/London", "倫敦 London"],
+          ["Europe/Paris", "巴黎 Paris"],
+          ["Europe/Berlin", "柏林 Berlin"],
+          ["Europe/Amsterdam", "阿姆斯特丹 Amsterdam"],
+          ["Europe/Brussels", "布魯塞爾 Brussels"],
+          ["Europe/Madrid", "馬德里 Madrid"],
+          ["Europe/Rome", "羅馬 Rome"],
+          ["Europe/Vienna", "維也納 Vienna"],
+          ["Europe/Prague", "布拉格 Prague"],
+          ["Europe/Warsaw", "華沙 Warsaw"],
+          ["Europe/Zurich", "蘇黎世 Zurich"],
+          ["Europe/Stockholm", "斯德哥爾摩 Stockholm"],
+          ["Europe/Copenhagen", "哥本哈根 Copenhagen"],
+          ["Europe/Helsinki", "赫爾辛基 Helsinki"],
+          ["Europe/Oslo", "奧斯陸 Oslo"],
+          ["Europe/Lisbon", "里斯本 Lisbon"],
+          ["Europe/Athens", "雅典 Athens"],
+          ["Europe/Budapest", "布達佩斯 Budapest"],
+          ["Europe/Istanbul", "伊斯坦堡 Istanbul"],
+          ["Europe/Kyiv", "基輔 Kyiv"],
+          ["Europe/Moscow", "莫斯科 Moscow"],
+          ["Atlantic/Reykjavik", "雷克雅維克 Reykjavik"]
+        ]
+      },
+      {
+        label: "美洲 Americas",
+        options: [
+          ["America/New_York", "紐約 New York"],
+          ["America/Chicago", "芝加哥 Chicago"],
+          ["America/Denver", "丹佛 Denver"],
+          ["America/Los_Angeles", "洛杉磯 Los Angeles"],
+          ["America/Toronto", "多倫多 Toronto"],
+          ["America/Vancouver", "溫哥華 Vancouver"],
+          ["America/Mexico_City", "墨西哥城 Mexico City"],
+          ["America/Phoenix", "鳳凰城 Phoenix"],
+          ["America/Anchorage", "安克拉治 Anchorage"],
+          ["Pacific/Honolulu", "檀香山 Honolulu"],
+          ["America/Sao_Paulo", "聖保羅 Sao Paulo"],
+          ["America/Buenos_Aires", "布宜諾斯艾利斯 Buenos Aires"],
+          ["America/Santiago", "聖地牙哥 Santiago"],
+          ["America/Lima", "利馬 Lima"],
+          ["America/Bogota", "波哥大 Bogota"]
+        ]
+      },
+      {
+        label: "大洋洲 Oceania",
+        options: [
+          ["Australia/Sydney", "雪梨 Sydney"],
+          ["Australia/Melbourne", "墨爾本 Melbourne"],
+          ["Australia/Brisbane", "布里斯本 Brisbane"],
+          ["Australia/Perth", "伯斯 Perth"],
+          ["Australia/Adelaide", "阿德雷德 Adelaide"],
+          ["Pacific/Auckland", "奧克蘭 Auckland"],
+          ["Pacific/Fiji", "斐濟 Fiji"],
+          ["Pacific/Guam", "關島 Guam"]
+        ]
+      },
+      {
+        label: "中東 / 非洲 Middle East / Africa",
+        options: [
+          ["Africa/Johannesburg", "約翰尼斯堡 Johannesburg"],
+          ["Africa/Cairo", "開羅 Cairo"],
+          ["Africa/Nairobi", "奈洛比 Nairobi"],
+          ["Africa/Casablanca", "卡薩布蘭卡 Casablanca"],
+          ["Africa/Lagos", "拉哥斯 Lagos"],
+          ["Asia/Jerusalem", "耶路撒冷 Jerusalem"],
+          ["Asia/Riyadh", "利雅德 Riyadh"],
+          ["Asia/Qatar", "多哈 Doha"],
+          ["Asia/Baku", "巴庫 Baku"]
+        ]
+      },
+      {
+        label: "其他 Others",
+        options: [
+          ["UTC", "UTC"]
+        ]
+      }
     ];
 
     const presetZones = [
       ["Asia/Taipei", "台北"],
       ["Europe/Dublin", "都柏林"],
       ["Europe/London", "倫敦"],
+      ["Europe/Paris", "巴黎"],
+      ["Asia/Tokyo", "東京"],
+      ["Asia/Seoul", "首爾"],
       ["America/New_York", "紐約"],
       ["America/Los_Angeles", "洛杉磯"],
-      ["Asia/Tokyo", "東京"]
+      ["Australia/Sydney", "雪梨"],
+      ["Atlantic/Reykjavik", "冰島"],
+      ["Asia/Dubai", "杜拜"],
+      ["Pacific/Auckland", "奧克蘭" ]
     ];
 
     const sourceZoneEl = document.getElementById("sourceZone");
@@ -489,7 +647,6 @@
     const swapBtn = document.getElementById("swapBtn");
     const sourcePresetRow = document.getElementById("sourcePresetRow");
     const targetPresetRow = document.getElementById("targetPresetRow");
-
     const sourceCity = document.getElementById("sourceCity");
     const sourceTime = document.getElementById("sourceTime");
     const sourceDate = document.getElementById("sourceDate");
@@ -498,6 +655,10 @@
     const targetDate = document.getElementById("targetDate");
     const offsetValue = document.getElementById("offsetValue");
     const warningBox = document.getElementById("warningBox");
+
+    function flattenZones() {
+      return groupedZones.flatMap(group => group.options);
+    }
 
     function toInputValue(dt) {
       return dt.toFormat("yyyy-LL-dd'T'HH:mm");
@@ -520,17 +681,22 @@
     }
 
     function getLabel(zone) {
-      const found = zoneOptions.find(item => item[0] === zone);
-      return found ? found[1] : zone;
+      const item = flattenZones().find(([value]) => value === zone);
+      return item ? item[1] : zone;
     }
 
     function populateZones() {
       [sourceZoneEl, targetZoneEl].forEach(select => {
-        zoneOptions.forEach(([value, label]) => {
-          const option = document.createElement("option");
-          option.value = value;
-          option.textContent = `${label} (${value})`;
-          select.appendChild(option);
+        groupedZones.forEach(group => {
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = group.label;
+          group.options.forEach(([value, label]) => {
+            const option = document.createElement("option");
+            option.value = value;
+            option.textContent = `${label} (${value})`;
+            optgroup.appendChild(option);
+          });
+          select.appendChild(optgroup);
         });
       });
 
@@ -563,10 +729,8 @@
     }
 
     function getSourceDateTime() {
-      const raw = sourceDateTimeEl.value;
-      const zone = sourceZoneEl.value;
-      if (!raw) return null;
-      return DateTime.fromISO(raw, { zone });
+      if (!sourceDateTimeEl.value) return null;
+      return DateTime.fromISO(sourceDateTimeEl.value, { zone: sourceZoneEl.value });
     }
 
     function setNow() {
@@ -589,7 +753,7 @@
       const messages = [];
 
       if (!sourceDT || !sourceDT.isValid) {
-        messages.push("請輸入有效的日期與時間。");
+        messages.push("請輸入有效的日期與時間。")
       }
 
       if (sourceDT && sourceDT.isValid) {
@@ -600,7 +764,7 @@
 
         const possible = sourceDT.getPossibleOffsets ? sourceDT.getPossibleOffsets() : [];
         if (possible.length > 1) {
-          messages.push("這個時間可能落在冬令時間切換區段，因此同一個時刻可能有兩種偏移量解讀。");
+          messages.push("這個時間剛好落在冬夏令切換區段，因此可能出現重複時間。")
         }
       }
 
@@ -613,7 +777,7 @@
       }
     }
 
-    function render(keepClockTime) {
+    function render(keepClockTime = false) {
       const rawInput = sourceDateTimeEl.value;
       let sourceDT = getSourceDateTime();
 
@@ -650,8 +814,10 @@
 
       const targetDT = sourceDT.setZone(targetZoneEl.value);
       const diffMinutes = targetDT.offset - sourceDT.offset;
-      const hours = diffMinutes / 60;
-      const diffText = Number.isInteger(hours) ? `${hours >= 0 ? "+" : ""}${hours}h` : `${hours >= 0 ? "+" : ""}${hours.toFixed(1)}h`;
+      const diffHours = diffMinutes / 60;
+      const diffText = Number.isInteger(diffHours)
+        ? `${diffHours >= 0 ? "+" : ""}${diffHours}h`
+        : `${diffHours >= 0 ? "+" : ""}${diffHours.toFixed(1)}h`;
 
       sourceCity.textContent = `${getLabel(sourceZoneEl.value)} ・ ${formatOffset(sourceDT.offset)}`;
       sourceTime.textContent = formatTime(sourceDT);
@@ -666,11 +832,22 @@
     }
 
     function swapZones() {
-      const source = sourceZoneEl.value;
-      const target = targetZoneEl.value;
-      sourceZoneEl.value = target;
-      targetZoneEl.value = source;
-      render(true);
+      const currentSource = getSourceDateTime();
+      const sourceZone = sourceZoneEl.value;
+      const targetZone = targetZoneEl.value;
+
+      if (currentSource && currentSource.isValid) {
+        const targetTimeValue = currentSource.setZone(targetZone);
+        sourceZoneEl.value = targetZone;
+        targetZoneEl.value = sourceZone;
+        sourceDateTimeEl.value = toInputValue(targetTimeValue);
+        render(false);
+        return;
+      }
+
+      sourceZoneEl.value = targetZone;
+      targetZoneEl.value = sourceZone;
+      render(false);
     }
 
     document.querySelectorAll("[data-days], [data-hours], [data-minutes]").forEach(btn => {
