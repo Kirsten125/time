@@ -94,6 +94,26 @@
       letter-spacing: -0.02em;
     }
 
+    .picker-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .picker-card {
+      background: rgba(255, 255, 255, 0.92);
+      border: 1px solid var(--line);
+      border-radius: 22px;
+      padding: 16px;
+    }
+
+    .picker-title {
+      margin: 0 0 12px;
+      font-size: 16px;
+      font-weight: 800;
+    }
+
     .form-grid {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -380,6 +400,7 @@
         padding: 16px;
       }
 
+      .picker-grid,
       .form-grid,
       .adjust-grid,
       .preset-wrap {
@@ -414,26 +435,44 @@
       <section class="card">
         <h2>設定</h2>
 
-        <div class="form-grid">
-          <div class="field">
-            <label for="sourceZone">原始城市 / 時區</label>
-            <select id="sourceZone"></select>
+        <div class="picker-grid">
+          <div class="picker-card">
+            <div class="picker-title">原始地點</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="sourceCountry">國家</label>
+                <select id="sourceCountry"></select>
+              </div>
+              <div class="field">
+                <label for="sourceCitySelect">城市</label>
+                <select id="sourceCitySelect"></select>
+              </div>
+            </div>
           </div>
 
-          <div class="field">
-            <label for="targetZone">目標城市 / 時區</label>
-            <select id="targetZone"></select>
+          <div class="picker-card">
+            <div class="picker-title">目標地點</div>
+            <div class="form-grid">
+              <div class="field">
+                <label for="targetCountry">國家</label>
+                <select id="targetCountry"></select>
+              </div>
+              <div class="field">
+                <label for="targetCitySelect">城市</label>
+                <select id="targetCitySelect"></select>
+              </div>
+            </div>
           </div>
+        </div>
 
-          <div class="field full">
-            <label for="sourceDateTime">日期與時間</label>
-            <input id="sourceDateTime" type="datetime-local" />
-          </div>
+        <div class="field full">
+          <label for="sourceDateTime">日期與時間</label>
+          <input id="sourceDateTime" type="datetime-local" />
         </div>
 
         <div class="toolbar">
           <button id="nowBtn" class="primary" type="button">現在時間</button>
-          <button id="swapBtn" class="soft" type="button">交換時區</button>
+          <button id="swapBtn" class="soft" type="button">交換地點</button>
         </div>
 
         <div class="section-title">調整時間</div>
@@ -472,7 +511,7 @@
           </div>
         </div>
 
-        <div class="section-title">常用城市</div>
+        <div class="section-title">常用地點</div>
         <div class="preset-wrap">
           <div class="preset-card">
             <div class="preset-title">設為原始</div>
@@ -518,130 +557,222 @@
   <script>
     const { DateTime } = luxon;
 
-    const groupedZones = [
+    const locationGroups = [
       {
         label: "亞洲 Asia",
-        options: [
-          ["Asia/Taipei", "台北 Taipei"],
-          ["Asia/Tokyo", "東京 Tokyo"],
-          ["Asia/Seoul", "首爾 Seoul"],
-          ["Asia/Hong_Kong", "香港 Hong Kong"],
-          ["Asia/Singapore", "新加坡 Singapore"],
-          ["Asia/Bangkok", "曼谷 Bangkok"],
-          ["Asia/Kuala_Lumpur", "吉隆坡 Kuala Lumpur"],
-          ["Asia/Manila", "馬尼拉 Manila"],
-          ["Asia/Jakarta", "雅加達 Jakarta"],
-          ["Asia/Ho_Chi_Minh", "胡志明市 Ho Chi Minh City"],
-          ["Asia/Shanghai", "上海 Shanghai"],
-          ["Asia/Beijing", "北京 Beijing"],
-          ["Asia/Macau", "澳門 Macau"],
-          ["Asia/Dubai", "杜拜 Dubai"],
-          ["Asia/Kolkata", "加爾各答 Kolkata"],
-          ["Asia/Kathmandu", "加德滿都 Kathmandu"],
-          ["Asia/Colombo", "可倫坡 Colombo"],
-          ["Asia/Tbilisi", "提比里斯 Tbilisi"]
+        countries: [
+          { country: "臺灣", cities: [{ city: "臺北", zone: "Asia/Taipei" }] },
+          { country: "日本", cities: [{ city: "東京", zone: "Asia/Tokyo" }] },
+          { country: "韓國", cities: [{ city: "首爾", zone: "Asia/Seoul" }] },
+          { country: "香港", cities: [{ city: "香港", zone: "Asia/Hong_Kong" }] },
+          { country: "新加坡", cities: [{ city: "新加坡", zone: "Asia/Singapore" }] },
+          { country: "泰國", cities: [{ city: "曼谷", zone: "Asia/Bangkok" }] },
+          { country: "馬來西亞", cities: [{ city: "吉隆坡", zone: "Asia/Kuala_Lumpur" }] },
+          { country: "菲律賓", cities: [{ city: "馬尼拉", zone: "Asia/Manila" }] },
+          { country: "印尼", cities: [
+            { city: "雅加達", zone: "Asia/Jakarta" },
+            { city: "望加錫", zone: "Asia/Makassar" },
+            { city: "查亞普拉", zone: "Asia/Jayapura" }
+          ] },
+          { country: "越南", cities: [{ city: "胡志明市", zone: "Asia/Ho_Chi_Minh" }] },
+          { country: "中國", cities: [
+            { city: "北京", zone: "Asia/Shanghai" },
+            { city: "上海", zone: "Asia/Shanghai" }
+          ] },
+          { country: "澳門", cities: [{ city: "澳門", zone: "Asia/Macau" }] },
+          { country: "阿聯酋", cities: [{ city: "杜拜", zone: "Asia/Dubai" }] },
+          { country: "印度", cities: [{ city: "加爾各答", zone: "Asia/Kolkata" }] },
+          { country: "尼泊爾", cities: [{ city: "加德滿都", zone: "Asia/Kathmandu" }] },
+          { country: "斯里蘭卡", cities: [{ city: "可倫坡", zone: "Asia/Colombo" }] },
+          { country: "喬治亞", cities: [{ city: "提比里斯", zone: "Asia/Tbilisi" }] },
+          { country: "巴基斯坦", cities: [{ city: "卡拉奇", zone: "Asia/Karachi" }] },
+          { country: "哈薩克", cities: [{ city: "阿拉木圖", zone: "Asia/Almaty" }] },
+          { country: "蒙古", cities: [{ city: "烏蘭巴托", zone: "Asia/Ulaanbaatar" }] },
+          { country: "烏茲別克", cities: [{ city: "塔什干", zone: "Asia/Tashkent" }] },
+          { country: "吉爾吉斯", cities: [{ city: "比什凱克", zone: "Asia/Bishkek" }] },
+          { country: "亞美尼亞", cities: [{ city: "葉里溫", zone: "Asia/Yerevan" }] },
+          { country: "亞塞拜然", cities: [{ city: "巴庫", zone: "Asia/Baku" }] },
+          { country: "以色列", cities: [{ city: "耶路撒冷", zone: "Asia/Jerusalem" }] },
+          { country: "沙烏地阿拉伯", cities: [{ city: "利雅德", zone: "Asia/Riyadh" }] },
+          { country: "卡達", cities: [{ city: "杜哈", zone: "Asia/Qatar" }] },
+          { country: "伊朗", cities: [{ city: "德黑蘭", zone: "Asia/Tehran" }] },
+          { country: "伊拉克", cities: [{ city: "巴格達", zone: "Asia/Baghdad" }] },
+          { country: "約旦", cities: [{ city: "安曼", zone: "Asia/Amman" }] },
+          { country: "黎巴嫩", cities: [{ city: "貝魯特", zone: "Asia/Beirut" }] },
+          { country: "阿曼", cities: [{ city: "馬斯開特", zone: "Asia/Muscat" }] },
+          { country: "科威特", cities: [{ city: "科威特城", zone: "Asia/Kuwait" }] },
+          { country: "巴林", cities: [{ city: "麥納瑪", zone: "Asia/Bahrain" }] },
+          { country: "不丹", cities: [{ city: "廷布", zone: "Asia/Thimphu" }] },
+          { country: "阿富汗", cities: [{ city: "喀布爾", zone: "Asia/Kabul" }] },
+          { country: "北韓", cities: [{ city: "平壤", zone: "Asia/Pyongyang" }] },
+          { country: "賽普勒斯", cities: [{ city: "尼科西亞", zone: "Asia/Nicosia" }] }
         ]
       },
       {
         label: "歐洲 Europe",
-        options: [
-          ["Europe/Dublin", "都柏林 Dublin"],
-          ["Europe/London", "倫敦 London"],
-          ["Europe/Paris", "巴黎 Paris"],
-          ["Europe/Berlin", "柏林 Berlin"],
-          ["Europe/Amsterdam", "阿姆斯特丹 Amsterdam"],
-          ["Europe/Brussels", "布魯塞爾 Brussels"],
-          ["Europe/Madrid", "馬德里 Madrid"],
-          ["Europe/Rome", "羅馬 Rome"],
-          ["Europe/Vienna", "維也納 Vienna"],
-          ["Europe/Prague", "布拉格 Prague"],
-          ["Europe/Warsaw", "華沙 Warsaw"],
-          ["Europe/Zurich", "蘇黎世 Zurich"],
-          ["Europe/Stockholm", "斯德哥爾摩 Stockholm"],
-          ["Europe/Copenhagen", "哥本哈根 Copenhagen"],
-          ["Europe/Helsinki", "赫爾辛基 Helsinki"],
-          ["Europe/Oslo", "奧斯陸 Oslo"],
-          ["Europe/Lisbon", "里斯本 Lisbon"],
-          ["Europe/Athens", "雅典 Athens"],
-          ["Europe/Budapest", "布達佩斯 Budapest"],
-          ["Europe/Istanbul", "伊斯坦堡 Istanbul"],
-          ["Europe/Kyiv", "基輔 Kyiv"],
-          ["Europe/Moscow", "莫斯科 Moscow"],
-          ["Atlantic/Reykjavik", "雷克雅維克 Reykjavik"]
+        countries: [
+          { country: "愛爾蘭", cities: [{ city: "都柏林", zone: "Europe/Dublin" }] },
+          { country: "英國", cities: [{ city: "倫敦", zone: "Europe/London" }] },
+          { country: "法國", cities: [{ city: "巴黎", zone: "Europe/Paris" }] },
+          { country: "德國", cities: [{ city: "柏林", zone: "Europe/Berlin" }] },
+          { country: "荷蘭", cities: [{ city: "阿姆斯特丹", zone: "Europe/Amsterdam" }] },
+          { country: "比利時", cities: [{ city: "布魯塞爾", zone: "Europe/Brussels" }] },
+          { country: "西班牙", cities: [{ city: "馬德里", zone: "Europe/Madrid" }] },
+          { country: "義大利", cities: [{ city: "羅馬", zone: "Europe/Rome" }] },
+          { country: "奧地利", cities: [{ city: "維也納", zone: "Europe/Vienna" }] },
+          { country: "捷克", cities: [{ city: "布拉格", zone: "Europe/Prague" }] },
+          { country: "波蘭", cities: [{ city: "華沙", zone: "Europe/Warsaw" }] },
+          { country: "瑞士", cities: [{ city: "蘇黎世", zone: "Europe/Zurich" }] },
+          { country: "瑞典", cities: [{ city: "斯德哥爾摩", zone: "Europe/Stockholm" }] },
+          { country: "丹麥", cities: [{ city: "哥本哈根", zone: "Europe/Copenhagen" }] },
+          { country: "芬蘭", cities: [{ city: "赫爾辛基", zone: "Europe/Helsinki" }] },
+          { country: "挪威", cities: [{ city: "奧斯陸", zone: "Europe/Oslo" }] },
+          { country: "葡萄牙", cities: [{ city: "里斯本", zone: "Europe/Lisbon" }] },
+          { country: "希臘", cities: [{ city: "雅典", zone: "Europe/Athens" }] },
+          { country: "匈牙利", cities: [{ city: "布達佩斯", zone: "Europe/Budapest" }] },
+          { country: "土耳其", cities: [{ city: "伊斯坦堡", zone: "Europe/Istanbul" }] },
+          { country: "烏克蘭", cities: [{ city: "基輔", zone: "Europe/Kyiv" }] },
+          { country: "俄羅斯", cities: [
+            { city: "莫斯科", zone: "Europe/Moscow" },
+            { city: "新西伯利亞", zone: "Asia/Novosibirsk" },
+            { city: "海參崴", zone: "Asia/Vladivostok" }
+          ] },
+          { country: "冰島", cities: [{ city: "雷克雅維克", zone: "Atlantic/Reykjavik" }] },
+          { country: "克羅埃西亞", cities: [{ city: "薩格勒布", zone: "Europe/Zagreb" }] },
+          { country: "羅馬尼亞", cities: [{ city: "布加勒斯特", zone: "Europe/Bucharest" }] },
+          { country: "保加利亞", cities: [{ city: "索菲亞", zone: "Europe/Sofia" }] },
+          { country: "立陶宛", cities: [{ city: "維爾紐斯", zone: "Europe/Vilnius" }] },
+          { country: "拉脫維亞", cities: [{ city: "里加", zone: "Europe/Riga" }] },
+          { country: "愛沙尼亞", cities: [{ city: "塔林", zone: "Europe/Tallinn" }] },
+          { country: "盧森堡", cities: [{ city: "盧森堡市", zone: "Europe/Luxembourg" }] },
+          { country: "塞爾維亞", cities: [{ city: "貝爾格勒", zone: "Europe/Belgrade" }] }
         ]
       },
       {
         label: "美洲 Americas",
-        options: [
-          ["America/New_York", "紐約 New York"],
-          ["America/Chicago", "芝加哥 Chicago"],
-          ["America/Denver", "丹佛 Denver"],
-          ["America/Los_Angeles", "洛杉磯 Los Angeles"],
-          ["America/Toronto", "多倫多 Toronto"],
-          ["America/Vancouver", "溫哥華 Vancouver"],
-          ["America/Mexico_City", "墨西哥城 Mexico City"],
-          ["America/Phoenix", "鳳凰城 Phoenix"],
-          ["America/Anchorage", "安克拉治 Anchorage"],
-          ["Pacific/Honolulu", "檀香山 Honolulu"],
-          ["America/Sao_Paulo", "聖保羅 Sao Paulo"],
-          ["America/Buenos_Aires", "布宜諾斯艾利斯 Buenos Aires"],
-          ["America/Santiago", "聖地牙哥 Santiago"],
-          ["America/Lima", "利馬 Lima"],
-          ["America/Bogota", "波哥大 Bogota"]
+        countries: [
+          { country: "美國", cities: [
+            { city: "紐約", zone: "America/New_York" },
+            { city: "芝加哥", zone: "America/Chicago" },
+            { city: "丹佛", zone: "America/Denver" },
+            { city: "洛杉磯", zone: "America/Los_Angeles" },
+            { city: "鳳凰城", zone: "America/Phoenix" },
+            { city: "安克拉治", zone: "America/Anchorage" },
+            { city: "檀香山", zone: "Pacific/Honolulu" }
+          ] },
+          { country: "加拿大", cities: [
+            { city: "多倫多", zone: "America/Toronto" },
+            { city: "溫哥華", zone: "America/Vancouver" },
+            { city: "愛德蒙頓", zone: "America/Edmonton" },
+            { city: "溫尼伯", zone: "America/Winnipeg" },
+            { city: "哈利法克斯", zone: "America/Halifax" },
+            { city: "聖約翰斯", zone: "America/St_Johns" }
+          ] },
+          { country: "墨西哥", cities: [
+            { city: "墨西哥城", zone: "America/Mexico_City" },
+            { city: "坎昆", zone: "America/Cancun" }
+          ] },
+          { country: "巴西", cities: [
+            { city: "聖保羅", zone: "America/Sao_Paulo" },
+            { city: "里奧布蘭科", zone: "America/Rio_Branco" }
+          ] },
+          { country: "阿根廷", cities: [{ city: "布宜諾斯艾利斯", zone: "America/Buenos_Aires" }] },
+          { country: "智利", cities: [{ city: "聖地牙哥", zone: "America/Santiago" }] },
+          { country: "秘魯", cities: [{ city: "利馬", zone: "America/Lima" }] },
+          { country: "哥倫比亞", cities: [{ city: "波哥大", zone: "America/Bogota" }] },
+          { country: "委內瑞拉", cities: [{ city: "卡拉卡斯", zone: "America/Caracas" }] },
+          { country: "烏拉圭", cities: [{ city: "蒙特維多", zone: "America/Montevideo" }] },
+          { country: "巴拉圭", cities: [{ city: "亞松森", zone: "America/Asuncion" }] },
+          { country: "玻利維亞", cities: [{ city: "拉巴斯", zone: "America/La_Paz" }] },
+          { country: "格陵蘭", cities: [{ city: "努克", zone: "America/Godthab" }] }
         ]
       },
       {
         label: "大洋洲 Oceania",
-        options: [
-          ["Australia/Sydney", "雪梨 Sydney"],
-          ["Australia/Melbourne", "墨爾本 Melbourne"],
-          ["Australia/Brisbane", "布里斯本 Brisbane"],
-          ["Australia/Perth", "伯斯 Perth"],
-          ["Australia/Adelaide", "阿德雷德 Adelaide"],
-          ["Pacific/Auckland", "奧克蘭 Auckland"],
-          ["Pacific/Fiji", "斐濟 Fiji"],
-          ["Pacific/Guam", "關島 Guam"]
+        countries: [
+          { country: "澳洲", cities: [
+            { city: "雪梨", zone: "Australia/Sydney" },
+            { city: "墨爾本", zone: "Australia/Melbourne" },
+            { city: "布里斯本", zone: "Australia/Brisbane" },
+            { city: "伯斯", zone: "Australia/Perth" },
+            { city: "阿德雷德", zone: "Australia/Adelaide" },
+            { city: "達爾文", zone: "Australia/Darwin" },
+            { city: "荷巴特", zone: "Australia/Hobart" }
+          ] },
+          { country: "紐西蘭", cities: [
+            { city: "奧克蘭", zone: "Pacific/Auckland" },
+            { city: "查塔姆群島", zone: "Pacific/Chatham" }
+          ] },
+          { country: "斐濟", cities: [{ city: "蘇瓦", zone: "Pacific/Fiji" }] },
+          { country: "關島", cities: [{ city: "阿加尼亞", zone: "Pacific/Guam" }] },
+          { country: "巴布亞紐幾內亞", cities: [{ city: "莫士比港", zone: "Pacific/Port_Moresby" }] },
+          { country: "帛琉", cities: [{ city: "科羅", zone: "Pacific/Palau" }] },
+          { country: "薩摩亞", cities: [{ city: "阿皮亞", zone: "Pacific/Apia" }] },
+          { country: "東加", cities: [{ city: "努瓜婁發", zone: "Pacific/Tongatapu" }] },
+          { country: "萬那杜", cities: [{ city: "維拉港", zone: "Pacific/Efate" }] },
+          { country: "馬紹爾群島", cities: [{ city: "馬久羅", zone: "Pacific/Majuro" }] }
         ]
       },
       {
         label: "中東 / 非洲 Middle East / Africa",
-        options: [
-          ["Africa/Johannesburg", "約翰尼斯堡 Johannesburg"],
-          ["Africa/Cairo", "開羅 Cairo"],
-          ["Africa/Nairobi", "奈洛比 Nairobi"],
-          ["Africa/Casablanca", "卡薩布蘭卡 Casablanca"],
-          ["Africa/Lagos", "拉哥斯 Lagos"],
-          ["Asia/Jerusalem", "耶路撒冷 Jerusalem"],
-          ["Asia/Riyadh", "利雅德 Riyadh"],
-          ["Asia/Qatar", "多哈 Doha"],
-          ["Asia/Baku", "巴庫 Baku"]
+        countries: [
+          { country: "南非", cities: [{ city: "約翰尼斯堡", zone: "Africa/Johannesburg" }] },
+          { country: "埃及", cities: [{ city: "開羅", zone: "Africa/Cairo" }] },
+          { country: "肯亞", cities: [{ city: "奈洛比", zone: "Africa/Nairobi" }] },
+          { country: "摩洛哥", cities: [{ city: "卡薩布蘭卡", zone: "Africa/Casablanca" }] },
+          { country: "奈及利亞", cities: [{ city: "拉哥斯", zone: "Africa/Lagos" }] },
+          { country: "迦納", cities: [{ city: "阿克拉", zone: "Africa/Accra" }] },
+          { country: "衣索比亞", cities: [{ city: "阿迪斯阿貝巴", zone: "Africa/Addis_Ababa" }] },
+          { country: "阿爾及利亞", cities: [{ city: "阿爾及爾", zone: "Africa/Algiers" }] },
+          { country: "突尼西亞", cities: [{ city: "突尼斯", zone: "Africa/Tunis" }] },
+          { country: "坦尚尼亞", cities: [{ city: "達累斯薩拉姆", zone: "Africa/Dar_es_Salaam" }] },
+          { country: "烏干達", cities: [{ city: "坎帕拉", zone: "Africa/Kampala" }] },
+          { country: "盧安達", cities: [{ city: "基加利", zone: "Africa/Kigali" }] },
+          { country: "安哥拉", cities: [{ city: "羅安達", zone: "Africa/Luanda" }] },
+          { country: "納米比亞", cities: [{ city: "溫得和克", zone: "Africa/Windhoek" }] },
+          { country: "辛巴威", cities: [{ city: "哈拉雷", zone: "Africa/Harare" }] },
+          { country: "波札那", cities: [{ city: "嘉柏隆里", zone: "Africa/Gaborone" }] },
+          { country: "喀麥隆", cities: [{ city: "杜阿拉", zone: "Africa/Douala" }] },
+          { country: "象牙海岸", cities: [{ city: "阿比讓", zone: "Africa/Abidjan" }] },
+          { country: "塞內加爾", cities: [{ city: "達卡", zone: "Africa/Dakar" }] },
+          { country: "剛果民主共和國", cities: [{ city: "金夏沙", zone: "Africa/Kinshasa" }] }
         ]
       },
       {
         label: "其他 Others",
-        options: [
-          ["UTC", "UTC"]
+        countries: [
+          { country: "世界協調時間", cities: [{ city: "UTC", zone: "UTC" }] }
         ]
       }
     ];
 
-    const presetZones = [
-      ["Asia/Taipei", "台北"],
-      ["Europe/Dublin", "都柏林"],
-      ["Europe/London", "倫敦"],
-      ["Europe/Paris", "巴黎"],
-      ["Asia/Tokyo", "東京"],
-      ["Asia/Seoul", "首爾"],
-      ["America/New_York", "紐約"],
-      ["America/Los_Angeles", "洛杉磯"],
-      ["Australia/Sydney", "雪梨"],
-      ["Atlantic/Reykjavik", "冰島"],
-      ["Asia/Dubai", "杜拜"],
-      ["Pacific/Auckland", "奧克蘭" ]
+    const presetLocations = [
+      { country: "臺灣", city: "臺北" },
+      { country: "愛爾蘭", city: "都柏林" },
+      { country: "英國", city: "倫敦" },
+      { country: "法國", city: "巴黎" },
+      { country: "日本", city: "東京" },
+      { country: "韓國", city: "首爾" },
+      { country: "美國", city: "紐約" },
+      { country: "美國", city: "洛杉磯" },
+      { country: "澳洲", city: "雪梨" },
+      { country: "冰島", city: "雷克雅維克" },
+      { country: "阿聯酋", city: "杜拜" },
+      { country: "紐西蘭", city: "奧克蘭" }
     ];
 
-    const sourceZoneEl = document.getElementById("sourceZone");
-    const targetZoneEl = document.getElementById("targetZone");
+    const allCountries = locationGroups.flatMap(group =>
+      group.countries.map(country => ({
+        groupLabel: group.label,
+        country: country.country,
+        cities: country.cities
+      }))
+    );
+
+    const sourceCountryEl = document.getElementById("sourceCountry");
+    const sourceCitySelectEl = document.getElementById("sourceCitySelect");
+    const targetCountryEl = document.getElementById("targetCountry");
+    const targetCitySelectEl = document.getElementById("targetCitySelect");
     const sourceDateTimeEl = document.getElementById("sourceDateTime");
     const nowBtn = document.getElementById("nowBtn");
     const swapBtn = document.getElementById("swapBtn");
@@ -656,8 +787,90 @@
     const offsetValue = document.getElementById("offsetValue");
     const warningBox = document.getElementById("warningBox");
 
-    function flattenZones() {
-      return groupedZones.flatMap(group => group.options);
+    function getCountryData(countryName) {
+      return allCountries.find(item => item.country === countryName);
+    }
+
+    function getSelectedLocation(side) {
+      const countryEl = side === "source" ? sourceCountryEl : targetCountryEl;
+      const cityEl = side === "source" ? sourceCitySelectEl : targetCitySelectEl;
+      const countryData = getCountryData(countryEl.value);
+      if (!countryData) return null;
+      const cityData = countryData.cities.find(item => item.city === cityEl.value) || countryData.cities[0];
+      return {
+        country: countryData.country,
+        city: cityData.city,
+        zone: cityData.zone
+      };
+    }
+
+    function setLocation(side, countryName, cityName) {
+      const countryEl = side === "source" ? sourceCountryEl : targetCountryEl;
+      const cityEl = side === "source" ? sourceCitySelectEl : targetCitySelectEl;
+      countryEl.value = countryName;
+      populateCitySelect(side, cityName);
+      cityEl.value = cityName;
+    }
+
+    function populateCountrySelects() {
+      [sourceCountryEl, targetCountryEl].forEach(select => {
+        select.innerHTML = "";
+        locationGroups.forEach(group => {
+          const optgroup = document.createElement("optgroup");
+          optgroup.label = group.label;
+          group.countries.forEach(country => {
+            const option = document.createElement("option");
+            option.value = country.country;
+            option.textContent = country.country;
+            optgroup.appendChild(option);
+          });
+          select.appendChild(optgroup);
+        });
+      });
+    }
+
+    function populateCitySelect(side, preferredCity) {
+      const countryEl = side === "source" ? sourceCountryEl : targetCountryEl;
+      const cityEl = side === "source" ? sourceCitySelectEl : targetCitySelectEl;
+      const countryData = getCountryData(countryEl.value);
+      cityEl.innerHTML = "";
+      if (!countryData) return;
+
+      countryData.cities.forEach(item => {
+        const option = document.createElement("option");
+        option.value = item.city;
+        option.textContent = item.city;
+        cityEl.appendChild(option);
+      });
+
+      const hasPreferred = countryData.cities.some(item => item.city === preferredCity);
+      cityEl.value = hasPreferred ? preferredCity : countryData.cities[0].city;
+    }
+
+    function createPresetButtons() {
+      presetLocations.forEach(item => {
+        const label = `${item.country} ${item.city}`;
+
+        const sourceBtn = document.createElement("button");
+        sourceBtn.type = "button";
+        sourceBtn.className = "chip";
+        sourceBtn.textContent = label;
+        sourceBtn.addEventListener("click", () => {
+          setLocation("source", item.country, item.city);
+          render(true);
+        });
+        sourcePresetRow.appendChild(sourceBtn);
+
+        const targetBtn = document.createElement("button");
+        targetBtn.type = "button";
+        targetBtn.className = "chip";
+        targetBtn.textContent = label;
+        targetBtn.addEventListener("click", () => {
+          setLocation("target", item.country, item.city);
+          render(false);
+        });
+        targetPresetRow.appendChild(targetBtn);
+      });
     }
 
     function toInputValue(dt) {
@@ -680,70 +893,29 @@
       return dt.toFormat("HH:mm");
     }
 
-    function getLabel(zone) {
-      const item = flattenZones().find(([value]) => value === zone);
-      return item ? item[1] : zone;
-    }
-
-    function populateZones() {
-      [sourceZoneEl, targetZoneEl].forEach(select => {
-        groupedZones.forEach(group => {
-          const optgroup = document.createElement("optgroup");
-          optgroup.label = group.label;
-          group.options.forEach(([value, label]) => {
-            const option = document.createElement("option");
-            option.value = value;
-            option.textContent = `${label} (${value})`;
-            optgroup.appendChild(option);
-          });
-          select.appendChild(optgroup);
-        });
-      });
-
-      sourceZoneEl.value = "Asia/Taipei";
-      targetZoneEl.value = "Europe/Dublin";
-    }
-
-    function createPresetButtons() {
-      presetZones.forEach(([zone, label]) => {
-        const sourceBtn = document.createElement("button");
-        sourceBtn.type = "button";
-        sourceBtn.className = "chip";
-        sourceBtn.textContent = label;
-        sourceBtn.addEventListener("click", () => {
-          sourceZoneEl.value = zone;
-          render(true);
-        });
-        sourcePresetRow.appendChild(sourceBtn);
-
-        const targetBtn = document.createElement("button");
-        targetBtn.type = "button";
-        targetBtn.className = "chip";
-        targetBtn.textContent = label;
-        targetBtn.addEventListener("click", () => {
-          targetZoneEl.value = zone;
-          render(false);
-        });
-        targetPresetRow.appendChild(targetBtn);
-      });
-    }
-
     function getSourceDateTime() {
-      if (!sourceDateTimeEl.value) return null;
-      return DateTime.fromISO(sourceDateTimeEl.value, { zone: sourceZoneEl.value });
+      const sourceLocation = getSelectedLocation("source");
+      if (!sourceLocation || !sourceDateTimeEl.value) return null;
+      return DateTime.fromISO(sourceDateTimeEl.value, { zone: sourceLocation.zone });
     }
 
     function setNow() {
-      const now = DateTime.now().setZone(sourceZoneEl.value).startOf("minute");
+      const sourceLocation = getSelectedLocation("source");
+      const zone = sourceLocation ? sourceLocation.zone : "Asia/Taipei";
+      const now = DateTime.now().setZone(zone).startOf("minute");
       sourceDateTimeEl.value = toInputValue(now);
       render(false);
     }
 
     function adjustTime({ days = 0, hours = 0, minutes = 0 }) {
       let dt = getSourceDateTime();
+      const sourceLocation = getSelectedLocation("source");
+      const zone = sourceLocation ? sourceLocation.zone : "Asia/Taipei";
+
       if (!dt || !dt.isValid) {
-        dt = DateTime.now().setZone(sourceZoneEl.value).startOf("minute");
+        dt = DateTime.now().setZone(zone).startOf("minute");
       }
+
       dt = dt.plus({ days, hours, minutes });
       sourceDateTimeEl.value = toInputValue(dt);
       render(false);
@@ -753,7 +925,7 @@
       const messages = [];
 
       if (!sourceDT || !sourceDT.isValid) {
-        messages.push("請輸入有效的日期與時間。")
+        messages.push("請輸入有效的日期與時間。");
       }
 
       if (sourceDT && sourceDT.isValid) {
@@ -764,7 +936,7 @@
 
         const possible = sourceDT.getPossibleOffsets ? sourceDT.getPossibleOffsets() : [];
         if (possible.length > 1) {
-          messages.push("這個時間剛好落在冬夏令切換區段，因此可能出現重複時間。")
+          messages.push("這個時間剛好落在冬夏令切換區段，因此可能出現重複時間。");
         }
       }
 
@@ -778,19 +950,21 @@
     }
 
     function render(keepClockTime = false) {
+      const sourceLocation = getSelectedLocation("source");
+      const targetLocation = getSelectedLocation("target");
       const rawInput = sourceDateTimeEl.value;
       let sourceDT = getSourceDateTime();
 
-      if ((!sourceDT || !sourceDT.isValid) && !rawInput) {
-        sourceDT = DateTime.now().setZone(sourceZoneEl.value).startOf("minute");
+      if ((!sourceDT || !sourceDT.isValid) && !rawInput && sourceLocation) {
+        sourceDT = DateTime.now().setZone(sourceLocation.zone).startOf("minute");
         sourceDateTimeEl.value = toInputValue(sourceDT);
       }
 
-      if (!sourceDT || !sourceDT.isValid) {
-        sourceCity.textContent = getLabel(sourceZoneEl.value);
+      if (!sourceDT || !sourceDT.isValid || !sourceLocation || !targetLocation) {
+        sourceCity.textContent = sourceLocation ? `${sourceLocation.country} ${sourceLocation.city}` : "";
         sourceTime.textContent = "--:--";
         sourceDate.textContent = "";
-        targetCity.textContent = getLabel(targetZoneEl.value);
+        targetCity.textContent = targetLocation ? `${targetLocation.country} ${targetLocation.city}` : "";
         targetTime.textContent = "--:--";
         targetDate.textContent = "";
         offsetValue.textContent = "--";
@@ -807,23 +981,23 @@
             hour: sourceDT.hour,
             minute: sourceDT.minute
           },
-          { zone: sourceZoneEl.value }
+          { zone: sourceLocation.zone }
         );
         sourceDateTimeEl.value = toInputValue(sourceDT);
       }
 
-      const targetDT = sourceDT.setZone(targetZoneEl.value);
+      const targetDT = sourceDT.setZone(targetLocation.zone);
       const diffMinutes = targetDT.offset - sourceDT.offset;
       const diffHours = diffMinutes / 60;
       const diffText = Number.isInteger(diffHours)
         ? `${diffHours >= 0 ? "+" : ""}${diffHours}h`
         : `${diffHours >= 0 ? "+" : ""}${diffHours.toFixed(1)}h`;
 
-      sourceCity.textContent = `${getLabel(sourceZoneEl.value)} ・ ${formatOffset(sourceDT.offset)}`;
+      sourceCity.textContent = `${sourceLocation.country} ${sourceLocation.city} ・ ${formatOffset(sourceDT.offset)}`;
       sourceTime.textContent = formatTime(sourceDT);
       sourceDate.textContent = formatDate(sourceDT);
 
-      targetCity.textContent = `${getLabel(targetZoneEl.value)} ・ ${formatOffset(targetDT.offset)}`;
+      targetCity.textContent = `${targetLocation.country} ${targetLocation.city} ・ ${formatOffset(targetDT.offset)}`;
       targetTime.textContent = formatTime(targetDT);
       targetDate.textContent = formatDate(targetDT);
 
@@ -831,22 +1005,24 @@
       updateWarning(sourceDT, rawInput);
     }
 
-    function swapZones() {
+    function swapLocations() {
       const currentSource = getSourceDateTime();
-      const sourceZone = sourceZoneEl.value;
-      const targetZone = targetZoneEl.value;
+      const sourceLocation = getSelectedLocation("source");
+      const targetLocation = getSelectedLocation("target");
 
-      if (currentSource && currentSource.isValid) {
-        const targetTimeValue = currentSource.setZone(targetZone);
-        sourceZoneEl.value = targetZone;
-        targetZoneEl.value = sourceZone;
-        sourceDateTimeEl.value = toInputValue(targetTimeValue);
-        render(false);
-        return;
+      if (!sourceLocation || !targetLocation) return;
+
+      const newSourceMoment = currentSource && currentSource.isValid
+        ? currentSource.setZone(targetLocation.zone)
+        : null;
+
+      setLocation("source", targetLocation.country, targetLocation.city);
+      setLocation("target", sourceLocation.country, sourceLocation.city);
+
+      if (newSourceMoment && newSourceMoment.isValid) {
+        sourceDateTimeEl.value = toInputValue(newSourceMoment);
       }
 
-      sourceZoneEl.value = targetZone;
-      targetZoneEl.value = sourceZone;
       render(false);
     }
 
@@ -860,13 +1036,26 @@
       });
     });
 
-    sourceZoneEl.addEventListener("change", () => render(true));
-    targetZoneEl.addEventListener("change", () => render(false));
+    sourceCountryEl.addEventListener("change", () => {
+      populateCitySelect("source");
+      render(true);
+    });
+
+    sourceCitySelectEl.addEventListener("change", () => render(true));
+
+    targetCountryEl.addEventListener("change", () => {
+      populateCitySelect("target");
+      render(false);
+    });
+
+    targetCitySelectEl.addEventListener("change", () => render(false));
     sourceDateTimeEl.addEventListener("input", () => render(false));
     nowBtn.addEventListener("click", setNow);
-    swapBtn.addEventListener("click", swapZones);
+    swapBtn.addEventListener("click", swapLocations);
 
-    populateZones();
+    populateCountrySelects();
+    setLocation("source", "臺灣", "臺北");
+    setLocation("target", "愛爾蘭", "都柏林");
     createPresetButtons();
     setNow();
   </script>
