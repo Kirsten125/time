@@ -510,19 +510,6 @@
             </div>
           </div>
         </div>
-
-        <div class="section-title">常用地點</div>
-        <div class="preset-wrap">
-          <div class="preset-card">
-            <div class="preset-title">設為原始</div>
-            <div id="sourcePresetRow" class="preset-row"></div>
-          </div>
-
-          <div class="preset-card">
-            <div class="preset-title">設為目標</div>
-            <div id="targetPresetRow" class="preset-row"></div>
-          </div>
-        </div>
       </section>
 
       <section class="card">
@@ -745,22 +732,6 @@
         ]
       }
     ];
-
-    const presetLocations = [
-      { country: "臺灣", city: "臺北" },
-      { country: "愛爾蘭", city: "都柏林" },
-      { country: "英國", city: "倫敦" },
-      { country: "法國", city: "巴黎" },
-      { country: "日本", city: "東京" },
-      { country: "韓國", city: "首爾" },
-      { country: "美國", city: "紐約" },
-      { country: "美國", city: "洛杉磯" },
-      { country: "澳洲", city: "雪梨" },
-      { country: "冰島", city: "雷克雅維克" },
-      { country: "阿聯酋", city: "杜拜" },
-      { country: "紐西蘭", city: "奧克蘭" }
-    ];
-
     const allCountries = locationGroups.flatMap(group =>
       group.countries.map(country => ({
         groupLabel: group.label,
@@ -776,8 +747,6 @@
     const sourceDateTimeEl = document.getElementById("sourceDateTime");
     const nowBtn = document.getElementById("nowBtn");
     const swapBtn = document.getElementById("swapBtn");
-    const sourcePresetRow = document.getElementById("sourcePresetRow");
-    const targetPresetRow = document.getElementById("targetPresetRow");
     const sourceCity = document.getElementById("sourceCity");
     const sourceTime = document.getElementById("sourceTime");
     const sourceDate = document.getElementById("sourceDate");
@@ -845,32 +814,6 @@
 
       const hasPreferred = countryData.cities.some(item => item.city === preferredCity);
       cityEl.value = hasPreferred ? preferredCity : countryData.cities[0].city;
-    }
-
-    function createPresetButtons() {
-      presetLocations.forEach(item => {
-        const label = `${item.country} ${item.city}`;
-
-        const sourceBtn = document.createElement("button");
-        sourceBtn.type = "button";
-        sourceBtn.className = "chip";
-        sourceBtn.textContent = label;
-        sourceBtn.addEventListener("click", () => {
-          setLocation("source", item.country, item.city);
-          render(true);
-        });
-        sourcePresetRow.appendChild(sourceBtn);
-
-        const targetBtn = document.createElement("button");
-        targetBtn.type = "button";
-        targetBtn.className = "chip";
-        targetBtn.textContent = label;
-        targetBtn.addEventListener("click", () => {
-          setLocation("target", item.country, item.city);
-          render(false);
-        });
-        targetPresetRow.appendChild(targetBtn);
-      });
     }
 
     function toInputValue(dt) {
@@ -1056,7 +999,6 @@
     populateCountrySelects();
     setLocation("source", "臺灣", "臺北");
     setLocation("target", "愛爾蘭", "都柏林");
-    createPresetButtons();
     setNow();
   </script>
 </body>
